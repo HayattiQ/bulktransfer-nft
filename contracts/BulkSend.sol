@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 
 
 contract BulkSend is Ownable {
-    Receiver[] private receivers;
+    Receiver[] public receivers;
 
     struct Receiver {
      address addr;
@@ -19,7 +19,7 @@ contract BulkSend is Ownable {
         delete receivers;
     }
 
-    function updateMultiList(address[] memory addressList, uint256[] memory tokenList) public onlyOwner returns (uint256)  {
+    function updateMultiList(address[] memory addressList, uint256[] memory tokenList) public onlyOwner {
         clearList();
         require(addressList.length == tokenList.length, "two list length need same");
         for (uint256 i = 0; i < addressList.length; i++) {
@@ -28,7 +28,6 @@ contract BulkSend is Ownable {
             rec.tokenID = tokenList[i];
             receivers.push(rec);
         }
-        return receivers.length;
     }
 
     function getCount() public view returns (uint256) {
@@ -36,7 +35,7 @@ contract BulkSend is Ownable {
     }
 
 
-    function bulksend(address tokenAddress) public {
+    function bulksend(address tokenAddress) public onlyOwner {
         require(receivers.length >= 1, "Need set receiver");
         for (uint256 i = 0; i < receivers.length; i++) {
             ERC721(tokenAddress).safeTransferFrom(msg.sender, receivers[i].addr, receivers[i].tokenID);

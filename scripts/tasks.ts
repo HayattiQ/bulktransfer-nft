@@ -6,6 +6,17 @@ import type { HardhatRuntimeEnvironment } from "hardhat/types";
 import fs from "fs";
 import { parse } from "csv-parse/sync"; // requiring sync module
 
+task("setApproved", "set approved")
+  .setAction(async function (args, hre) {
+    const contract = await ethers.getContract(
+    );
+    const res = await contract.setApprovalForAll(
+      "0x813C6726e40CBCdFF33d27324b9AE77a4e4d43FD",
+      true
+    );
+    console.log(`multilist update. ${res.hash}`);
+  });
+
 task("receivers", "Update Receivers")
   .addOptionalParam("filename", "CSV file name", "./scripts/receivers.csv")
   .setAction(async function (args, hre) {
@@ -23,8 +34,6 @@ task("receivers", "Update Receivers")
     const contract: BulkSend = (await getContract(hre)) as BulkSend;
     const res = await contract.updateMultiList(addresses, tokenIDs);
     console.log(`multilist update. ${res.hash}`);
-    const count = await contract.getCount();
-    console.log(`current receivers count. ${count}`);
   });
 
 task("bulksend", "Update Receivers")
@@ -33,18 +42,11 @@ task("bulksend", "Update Receivers")
     const contract: BulkSend = (await getContract(hre)) as BulkSend;
     const transactionResponse = await contract.bulksend(args.address);
     console.log(`Transaction complete. hash: ${transactionResponse.hash}`);
-    console.log(transactionResponse);
   });
-
-function getProvider(hre: HardhatRuntimeEnvironment) {
-  // @ts-ignore
-  const provider = new ethers.providers.JsonRpcProvider(hre.network.config.url);
-  return provider;
-}
 
 // Helper method for fetching a contract instance at a given address
 async function getContract(hre: HardhatRuntimeEnvironment) {
-  const account = getAccount(hre.network.name);
+  const account = getAccount(hre);
   const contractAddress =
     process.env["NFT_CONTRACT_ADDRESS_" + hre.network.name.toUpperCase()];
   if (!contractAddress) {
@@ -53,16 +55,20 @@ async function getContract(hre: HardhatRuntimeEnvironment) {
         hre.network.name.toUpperCase()
     );
   }
-  const signer = getProvider(hre).getSigner(await account.getAddress());
-  return getContractAt(hre, "BulkSend", contractAddress, signer);
+  return getContractAt(hre, "BulkSend", contractAddress, account);
 }
 
-export function getAccount(network: string): ethers.Wallet {
-  if (network === "localhost") {
+export function getAccount(hre: HardhatRuntimeEnvironment): ethers.Wallet {
+  if (hre.network.name === "localhost") {
     return ethers.Wallet.fromMnemonic(
       "test test test test test test test test test test test junk"
     );
   } else {
-    return new ethers.Wallet(process.env.PRIVATE_KEY || "");
+    const provider = new ethers.providers.JsonRpcProvider(
+      // @ts-ignore
+      hre.network.config.url
+    );
+
+    return new ethers.Wallet(process.env.PRIVATE_KEY || "", provider);
   }
 }

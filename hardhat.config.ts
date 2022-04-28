@@ -33,6 +33,12 @@ const config: HardhatUserConfig = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    astar: {
+      url: "https://rpc.astar.network:8545",
+      chainId: 592,
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
     localhost: {
       url: "http://localhost:8545",
       chainId: 31337,
