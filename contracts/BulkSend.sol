@@ -19,14 +19,7 @@ contract BulkSend is Ownable {
         delete receivers;
     }
 
-    function updateList(address addr, uint256 tokenID) public onlyOwner {
-        Receiver memory rec;
-        rec.addr = addr;
-        rec.tokenID = tokenID;
-        receivers.push(rec);
-    }
-
-    function updateMultiList(address[] memory addressList, uint256[] memory tokenList) public onlyOwner {
+    function updateMultiList(address[] memory addressList, uint256[] memory tokenList) public onlyOwner returns (uint256)  {
         clearList();
         require(addressList.length == tokenList.length, "two list length need same");
         for (uint256 i = 0; i < addressList.length; i++) {
@@ -35,6 +28,7 @@ contract BulkSend is Ownable {
             rec.tokenID = tokenList[i];
             receivers.push(rec);
         }
+        return receivers.length;
     }
 
     function getCount() public view returns (uint256) {
