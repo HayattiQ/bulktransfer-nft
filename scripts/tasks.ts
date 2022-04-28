@@ -6,17 +6,6 @@ import type { HardhatRuntimeEnvironment } from "hardhat/types";
 import fs from "fs";
 import { parse } from "csv-parse/sync"; // requiring sync module
 
-task("setApproved", "set approved")
-  .setAction(async function (args, hre) {
-    const contract = await ethers.getContract(
-    );
-    const res = await contract.setApprovalForAll(
-      "0x813C6726e40CBCdFF33d27324b9AE77a4e4d43FD",
-      true
-    );
-    console.log(`multilist update. ${res.hash}`);
-  });
-
 task("receivers", "Update Receivers")
   .addOptionalParam("filename", "CSV file name", "./scripts/receivers.csv")
   .setAction(async function (args, hre) {
